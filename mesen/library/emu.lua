@@ -152,8 +152,8 @@ function emu.removeMemoryCallback(reference, memCallback, startAddress, endAddre
 --- @param x integer X position
 --- @param y integer Y position
 --- @param color integer Color
---- @param duration integer Number of frames to display (Default: 1 frame)
---- @param delay integer Number of frames to wait before drawing the pixel (Default: 0 frames)
+--- @param duration? integer Number of frames to display (Default: 1 frame)
+--- @param delay? integer Number of frames to wait before drawing the pixel (Default: 0 frames)
 function emu.drawPixel(x, y, color, duration, delay) end
 
 --- Draws a line between (x, y) to (x2, y2) using the specified color for a specific number of frames.
@@ -162,8 +162,8 @@ function emu.drawPixel(x, y, color, duration, delay) end
 --- @param x2 integer X position (end of line)  
 --- @param y2 integer Y position (end of line)  
 --- @param color integer Color  
---- @param duration integer Number of frames to display (Default: 1 frame)  
---- @param delay integer Number of frames to wait before drawing the line (Default: 0 frames)
+--- @param duration? integer Number of frames to display (Default: 1 frame)  
+--- @param delay? integer Number of frames to wait before drawing the line (Default: 0 frames)
 function emu.drawLine(x, y, x2, y2, color, duration, delay) end
 
 --- Draws a rectangle between (x, y) to (x+width, y+height) using the specified color for a specific number of frames.  
@@ -173,8 +173,8 @@ function emu.drawLine(x, y, x2, y2, color, duration, delay) end
 --- @param height integer The rectangle's height  
 --- @param color integer Color  
 --- @param fill boolean Whether or not to draw an outline, or a filled rectangle.  
---- @param duration integer Number of frames to display (Default: 1 frame)  
---- @param delay integer Number of frames to wait before drawing the rectangle (Default: 0 frames)
+--- @param duration? integer Number of frames to display (Default: 1 frame)  
+--- @param delay? integer Number of frames to wait before drawing the rectangle (Default: 0 frames)
 function emu.drawRectangle(x, y, width, height, color, fill, duration, delay) end
 
 --- Draws text at (x, y) using the specified text and colors for a specific number of frames.
@@ -183,8 +183,8 @@ function emu.drawRectangle(x, y, width, height, color, fill, duration, delay) en
 --- @param text string The text to display  
 --- @param textColor integer Color to use for the text  
 --- @param backgroundColor integer Color to use for the text's background color  
---- @param duration integer Number of frames to display (Default: 1 frame)  
---- @param delay integer Number of frames to wait before drawing the text (Default: 0 frames)
+--- @param duration? integer Number of frames to display (Default: 1 frame)  
+--- @param delay? integer Number of frames to wait before drawing the text (Default: 0 frames)
 function emu.drawString(x, y, text, textColor, backgroundColor, duration, delay) end
 
 --- Removes all drawings from the screen.
