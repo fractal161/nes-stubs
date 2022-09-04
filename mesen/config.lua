@@ -1,0 +1,4 @@
+name = "Mesen"
+words = {
+	"emu"
+}
