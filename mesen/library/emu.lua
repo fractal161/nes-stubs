@@ -205,3 +205,212 @@ function emu.getScreenBuffer() end
 function emu.setScreenBuffer(screenBuffer) end
 
 -- EMULATION --
+
+--- @class Cpu
+--- @field status integer
+--- @field a integer
+--- @field irqFlag integer
+--- @field cycleCount integer
+--- @field pc integer
+--- @field y integer
+--- @field x integer
+--- @field sp integer
+--- @field nmiFlag boolean
+
+--- @class PpuCtrl
+--- @field backgroundEnabled boolean
+--- @field intensifyBlue boolean
+--- @field intensifyRed boolean
+--- @field backgroundPatternAddr integer
+--- @field grayscale boolean
+--- @field verticalWrite boolean
+--- @field intensifyGreen boolean
+--- @field nmiOnVBlank boolean
+--- @field spritesEnabled boolean
+--- @field spritePatternAddr integer
+--- @field spriteMask boolean
+--- @field largeSprites boolean
+--- @field backgroundMask boolean
+
+--- @class PpuStatus
+--- @field spriteOverflow boolean
+--- @field verticalBlank boolean
+--- @field sprite0Hit boolean
+
+--- @class PpuState
+--- @field status integer
+--- @field lowBitShift integer
+--- @field xScroll integer
+--- @field highBitShift integer
+--- @field videoRamAddr integer
+--- @field control integer
+--- @field mask integer
+--- @field tmpVideoRamAddr integer
+--- @field writeToggle boolean
+--- @field spriteRamAddr integer
+
+--- @class Ppu
+--- @field cycle integer
+--- @field scanline integer
+--- @field framecount integer
+--- @field control PpuCtrl
+--- @field status PpuStatus
+--- @field stat PpuState
+
+--- @class Envelope
+--- @field counter integer
+--- @field loop boolean
+--- @field divider integer
+--- @field volumne integer
+--- @field startFlag boolean
+--- @field constantVolume boolean
+
+--- @class LengthCounter
+--- @field halt boolean
+--- @field counter integer
+--- @field reloadValue integer
+
+--- @class ApuSquare
+--- @field outputVolume integer
+--- @field frequency number
+--- @field duty integer
+--- @field period integer
+--- @field enabled boolean
+--- @field dutyPosition integer
+--- @field sweepShift integer
+--- @field sweepPeriod integer
+--- @field sweepEnabled boolean
+--- @field sweepNegate boolean
+--- @field envelope Envelope
+--- @field lengthCounter LengthCounter
+
+--- @class ApuTriangle
+--- @field outputVolume integer
+--- @field frequency number
+--- @field sequencePosition integer
+--- @field period integer
+--- @field enabled boolean
+--- @field lengthCounter LengthCounter
+
+--- @class ApuNoise
+--- @field modeFlag boolean
+--- @field enabled boolean
+--- @field outputVolume integer
+--- @field frequency number
+--- @field period integer
+--- @field shiftRegister integer
+--- @field envelope Envelope
+--- @field lengthCounter LengthCounter
+
+--- @class ApuDmc
+--- @field sampleLength integer
+--- @field irqEnabled boolean
+--- @field loop boolean
+--- @field outputVolume integer
+--- @field bytesRemaining integer
+--- @field sampleAddr integer
+--- @field period integer
+--- @field sampleRate number
+
+--- @class ApuFrameCounter
+--- @field fiveStepMode integer
+--- @field irqEnabled integer
+--- @field sequencePosition integer
+
+--- @class Apu
+--- @field square1 ApuSquare
+--- @field square2 ApuSquare
+--- @field triangle ApuTriangle
+--- @field noise ApuNoise
+--- @field dmc ApuDmc
+--- @field frameCounter ApuFrameCounter
+
+--- @class Cart
+--- @field selectedPrgPages integer[]
+--- @field chrRomSize integer
+--- @field chrRamSize integer
+--- @field prgPageCount integer
+--- @field chrPageSize integer
+--- @field selectedChrPages integer[]
+--- @field chrPageCount integer
+--- @field prgRomSize integer
+--- @field prgPageSize integer
+
+--- @class EmuState
+--- @field region integer
+--- @field clockRate integer
+--- @field cpu Cpu
+--- @field ppu Ppu
+--- @field apu Apu
+--- @field cart Cart
+
+--- Return a table containing information about the state of the CPU, PPU, APU, and cartridge.
+--- @return EmuState # Current emulation state.
+function emu.getState() end
+
+--- Updates the CPU and PPU’s state. The state parameter must be a table in the same format as the one returned by getState()
+--- Note: the state of the APU or cartridge cannot be modified by using setState().
+--- @param state EmuState A table containing the state of the emulation to apply.
+function emu.setState(state) end
+
+--- Breaks the execution of the game and displays the debugger window.
+function emu.breakExecution() end
+
+--- Runs the emulator for the specified number of cycles/instructions and then breaks the execution.
+--- @param count integer The number of cycles or instructions to run before breaking
+--- @param executeType executeCountType
+function emu.execute(count, executeType) end
+
+--- Resets the current game.
+function emu.reset() end
+
+--- Stops and unloads the current game. When in test runner mode, this will also exit Mesen itself and the Mesen process will return the specified exit code.
+--- @param exitCode integer The exit code that the Mesen process will return when exiting (when used in test runner mode)
+function emu.stop(exitCode) end
+
+--- Resumes execution after breaking.
+function emu.resume() end
+
+--- Instantly rewinds the emulation by the number of seconds specified.
+--- Note: this can only be called from within a “StartFrame” event callback.
+--- seconds integer The number of seconds to rewind
+function emu.rewind(seconds) end
+
+-- INPUT --
+
+--- @class Input
+--- @field a boolean
+--- @field b boolean
+--- @field select boolean
+--- @field start boolean
+--- @field up boolean
+--- @field down boolean
+--- @field left boolean
+--- @field right boolean
+
+--- Returns a table containing the status of all 8 buttons.
+--- @param port integer The port number to read (0 to 3)
+--- @return Input A table containing the status of all 8 buttons.
+function emu.getInput(port) end
+
+--- Buttons enabled or disabled via setInput will keep their state until the next inputPolled event.
+--- If a button’s value is not specified to either true or false in the input argument, then the player retains control of that button. For example, setInput(0, { select = false, start = false}) will prevent the player 1 from using both the start and select buttons, but all other buttons will still work as normal. To properly control the emulation, it is recommended to use this function within a callback for the inputPolled event. Otherwise, the inputs may not be applied before the ROM has the chance to read them.
+--- @param port integer The port number to apply the input to (0 to 3)
+--- @param input Input A table containing the state of some (or all) of the 8 buttons (same format as returned by getInput)
+function emu.setInput(port, input) end
+
+--- @class MouseState
+--- @field x integer
+--- @field y integer
+--- @field left boolean
+--- @field middle boolean
+--- @field right boolean
+
+--- Returns a table containing the position and the state of all 3 buttons.
+--- @return MouseState
+function emu.getMouseState() end
+
+--- Returns whether or not a specific key is pressed. The “keyName” must be the same as the string shown in the UI when the key is bound to a button.
+--- @param keyName string The name of the key to check
+--- @return boolean The key's state (true = pressed)
+function emu.isKeyPressed(keyName) end
