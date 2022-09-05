@@ -390,7 +390,7 @@ function emu.rewind(seconds) end
 
 --- Returns a table containing the status of all 8 buttons.
 --- @param port integer The port number to read (0 to 3)
---- @return Input A table containing the status of all 8 buttons.
+--- @return Input # A table containing the status of all 8 buttons.
 function emu.getInput(port) end
 
 --- Buttons enabled or disabled via setInput will keep their state until the next inputPolled event.
@@ -412,5 +412,157 @@ function emu.getMouseState() end
 
 --- Returns whether or not a specific key is pressed. The “keyName” must be the same as the string shown in the UI when the key is bound to a button.
 --- @param keyName string The name of the key to check
---- @return boolean The key's state (true = pressed)
+--- @return boolean # The key's state (true = pressed)
 function emu.isKeyPressed(keyName) end
+
+-- LOGGING -- 
+
+--- Displays a message on the main window in the format “[category] text”
+--- @param category string The portion shown between brackets []
+--- @param text string Text to show on the screen
+function emu.displayMessage(category, text) end
+
+--- Logs the given string in the script’s log window - useful for debugging scripts.
+--- @param text string Text to log
+function emu.log(text) end
+
+-- MEMORY ACCESS --
+
+--- Reads a value from the specified memory type.
+---
+--- When calling read with the memType.cpu or memType.ppu memory types, emulation side-effects may occur.
+--- To avoid triggering side-effects, use the memType.cpuDebug or memType.ppuDebug types, which will not cause side-effects.
+--- @param address integer The address/offset to read from.
+--- @param memType memType The type of memory to read from.
+--- @param signed? boolean If true, the value returned will be interpreted as a signed value.
+function emu.read(address, memType, signed) end
+
+--- Reads a value from the specified memory type.
+---
+--- When calling readWord with the memType.cpu or memType.ppu memory types, emulation side-effects may occur.
+--- To avoid triggering side-effects, use the memType.cpuDebug or memType.ppuDebug types, which will not cause side-effects.
+--- @param address integer The address/offset to read from.
+--- @param memType memType The type of memory to read from.
+--- @param signed? boolean If true, the value returned will be interpreted as a signed value.
+function emu.readWord(address, memType, signed) end
+
+--- Writes an 8-bit or 16-bit value to the specified memory type.
+--- 
+--- Normally read-only types such as PRG-ROM or CHR-ROM can be written to when using memType.prgRom or memType.chrRom.
+--- Changes will remain in effect until a power cycle occurs.
+--- To revert changes done to ROM, see revertPrgChrChanges.
+--- 
+--- When calling write with the memType.cpu or memType.ppu memory types, emulation side-effects may occur.
+--- To avoid triggering side-effects, use the memType.cpuDebug or memType.ppuDebug types, which will not cause side-effects.
+--- @param address integer The address/offset to write to.
+--- @param value integer The value to write.
+--- @param memType memType The type of memory to write to.
+function emu.write(address, value, memType) end
+
+--- Writes an 8-bit or 16-bit value to the specified memory type.
+--- 
+--- Normally read-only types such as PRG-ROM or CHR-ROM can be written to when using memType.prgRom or memType.chrRom.
+--- Changes will remain in effect until a power cycle occurs.
+--- To revert changes done to ROM, see revertPrgChrChanges.
+--- 
+--- When calling writeWord with the memType.cpu or memType.ppu memory types, emulation side-effects may occur.
+--- To avoid triggering side-effects, use the memType.cpuDebug or memType.ppuDebug types, which will not cause side-effects.
+--- @param address integer The address/offset to write to.
+--- @param value integer The value to write.
+--- @param memType memType The type of memory to write to.
+function emu.writeWord(address, value, memType) end
+
+--- Reverts all modifications done to PRG-ROM and CHR-ROM via write/writeWord calls.
+function emu.revertPrgChrChanges() end
+
+--- Returns an integer representing the byte offset of the specified CPU address in PRG ROM based on the mapper’s current configuration. Returns -1 when the specified address is not mapped to PRG ROM.
+--- @param address integer A CPU address (Valid range: $0000-$FFFF)
+--- @return integer # The corresponding byte offset in PRG ROM
+function emu.getPrgRomOffset(address) end
+
+--- Returns an integer representing the byte offset of the specified PPU address in CHR ROM based on the mapper’s current configuration. Returns -1 when the specified address is not mapped to CHR ROM.
+--- @param address integer A PPU address (Valid range: $0000-$3FFF)
+--- @return integer # The corresponding byte offset in CHR ROM
+function emu.getChrRomOffset(address) end
+
+--- Returns the address of the specified label. This address can be used with the memory read/write functions (read(), readWord(), write(), writeWord()) using the emu.memType.cpu or emu.memType.cpuDebug memory types.
+--- @param label string The label to look up
+--- @return integer # The corresponding CPU address
+function emu.getLabelAddress(label) end
+
+-- MISC --
+
+--- Creates a savestate and returns it as a binary string. (The savestate is not saved on disk)
+--- Note: this can only be called from within a “startFrame” event callback or “cpuExec” memory callback.
+--- @return string # A string containing a binary blob representing the emulation's current state.
+function emu.saveSavestate() end
+
+--- Queues a save savestate request. As soon at the emulator is able to process the request, it will be saved into the specified slot.
+--- This API is asynchronous because save states can only be taken in-between 2 CPU instructions, not in the middle of an instruction. When called while the CPU is in-between 2 instructions (e.g: inside the callback of an cpuExec or startFrame event), the save state will be taken immediately and its data will be available via getSavestateData right after the call to saveSavestateAsync.
+--- The savestate can be loaded by calling the loadSavestateAsync function.
+--- @param slotNumber integer A slot number to which the savestate data will be stored (slotNumber must be >= 0)
+function emu.saveSavestateAsync(slotNumber) end
+
+--- Loads the specified savestate.
+--- Note: this can only be called from within a “startFrame” event callback or “cpuExec” memory callback.
+--- @param savestate string A binary blob representing a savestate, as returned by saveSavestate()
+function emu.loadSavestate(savestate) end
+
+--- Queues a load savestate request. As soon at the emulator is able to process the request, the savestate will be loaded from the specified slot.
+--- This API is asynchronous because save states can only be loaded in-between 2 CPU instructions, not in the middle of an instruction. When called while the CPU is in-between 2 instructions (e.g: inside the callback of an cpuExec or startFrame event), the savestate will be loaded immediately.
+--- @param slotNumber integer The slot number to load the savestate data from (must be a slot number that was used in a preceding saveSavestateAsync call)
+--- @return boolean # Returns true if the slot number was valid.
+function emu.loadSavestateAsync(slotNumber) end
+
+--- Returns the savestate stored in the specified savestate slot.
+--- @param slotNumber integer The slot number to get the savestate data from (must be a slot number that was used in a preceding saveSavestateAsync call)
+--- @return string # A binary string containing the savestate
+function emu.getSavestateData(slotNumber) end
+
+--- Clears the specified savestate slot (any savestate data in that slot will be removed from memory).
+--- @param slotNumber integer The slot number to get the savestate data from (must be a slot number that was used in a preceding saveSavestateAsync call)
+function emu.clearSavestateData(slotNumber) end
+
+--- Activates a game genie cheat code (6 or 8 characters).
+--- Note: cheat codes added via this function are not permanent and not visible in the UI.
+--- @param cheatCode string A game genie format cheat code.
+function emu.addCheat(cheatCode) end
+
+--- Removes all active cheat codes (has no impact on cheat codes saved within the UI)
+function emu.clearCheats() end
+
+--- Returns an array of access counters for the specified memory and operation types.
+--- @param counterMemType counterMemType
+--- @param counterOpType counterOpType
+function emu.getAccessCounters(counterMemType, counterOpType) end
+
+--- Resets all access counters.
+function emu.resetAccessCounters() end
+
+--- Returns the same text as what is shown in the emulator’s Log Window.
+--- @return string # A string containing the log shown in the log window
+function emu.getLogWindowLog() end
+
+--- @class RomInfo
+--- @field name string Filename of the current ROM
+--- @field path string Full path to the current ROM (including parent compressed archive when needed)
+--- @field fileCrc32Hash integer The CRC32 value for the whole ROM file
+--- @field fileSha1Hash string The SHA1 hash for the whole ROM file
+--- @field prgChrCrc32Hash integer The CRC32 value for the file excluding its 16-byte header
+--- @field prgChrMd5Hash string The MD5 hash for the file excluding its 16-byte header
+--- @field format integer Value that represents the ROM format: 1 = iNES 2 = UNIF 3 = FDS 4 = NSF
+--- @field isChrRam boolean true when the game uses CHR RAM false otherwise
+
+--- Returns information about the ROM file that is currently running.
+--- @return RomInfo # Information about the current ROM
+function emu.getRomInfo() end
+
+--- This function returns the path to a unique folder (based on the script’s filename) where the script should store its data (if any data needs to be saved).
+--- The data will be saved in subfolders inside the LuaScriptData folder in Mesen’s home folder.
+--- @return string The script's data folder
+function emu.getScriptDataFolder() end
+
+--- Takes a screenshot and returns a PNG file as a string.
+--- The screenshot is not saved to the disk.
+--- @return string # A binary string containing a PNG image.
+function emu.takeScreenshot() end
